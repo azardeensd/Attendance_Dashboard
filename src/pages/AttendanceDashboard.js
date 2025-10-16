@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import supabase from '../services/auth';
 import './AttendanceDashboard.css';
 import * as XLSX from 'xlsx'; // You'll need to install this package
-import { SpeedInsights } from "@vercel/speed-insights/react"
+import { SpeedInsights } from "@vercel/speed-insights/react";
 
 const AttendanceDashboard = () => {
     const [attendanceData, setAttendanceData] = useState({
