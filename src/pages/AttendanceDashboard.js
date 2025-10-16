@@ -24,9 +24,8 @@ const AttendanceDashboard = () => {
 
     // All departments
     const allDepartments = [
-        'HR', 'IT', 'Finance', 'Marketing', 'BH Office', 'Safety', 
-        'CMED', 'R&D', 'PROG.MGMT', 'MESD', 'TQM', 'TPM', 
-        'STRATEGY', 'CORP. QUALITY'
+        'MARKETING','R&D','I.S','MMD','MESD','QUALITY','FINANCE','MMD-STA','TPM','HR','PROG.MGMT','BH OFFICE',
+'TQM','HSE','STRATEGY'
     ];
 
     // Update current time every second
