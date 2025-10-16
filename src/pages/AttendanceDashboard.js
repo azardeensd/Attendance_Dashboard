@@ -204,13 +204,23 @@ const AttendanceDashboard = () => {
                     }
                 });
 
-                // Prepare department data
-                departmentStats = allDepartments.map(dept => ({
-                    department: dept,
-                    present: presentCounts[dept] || 0,
-                    total: totalCounts[dept] || 0,
-                    absent: (totalCounts[dept] || 0) - (presentCounts[dept] || 0)
-                }));
+                // Prepare department data with percentages
+                departmentStats = allDepartments.map(dept => {
+                    const total = totalCounts[dept] || 0;
+                    const present = presentCounts[dept] || 0;
+                    const absent = total - present;
+                    const presentPercentage = total > 0 ? Math.round((present / total) * 100) : 0;
+                    const absentPercentage = total > 0 ? Math.round((absent / total) * 100) : 0;
+
+                    return {
+                        department: dept,
+                        present,
+                        total,
+                        absent,
+                        presentPercentage,
+                        absentPercentage
+                    };
+                });
 
             } else {
                 // For weekly view, get attendance by department for the week
@@ -261,17 +271,22 @@ const AttendanceDashboard = () => {
                     }
                 });
 
-                // Calculate weekly totals (multiply daily average by 7)
+                // Calculate weekly percentages
                 departmentStats = allDepartments.map(dept => {
+                    const total = totalCounts[dept] || 0;
                     const dailyPresent = (presentCounts[dept] || 0) / 7;
                     const weeklyPresent = Math.round(dailyPresent * 7);
-                    const totalWeekly = (totalCounts[dept] || 0) * 7;
+                    const totalWeekly = total * 7;
+                    const presentPercentage = total > 0 ? Math.round((dailyPresent / total) * 100) : 0;
+                    const absentPercentage = total > 0 ? 100 - presentPercentage : 0;
                     
                     return {
                         department: dept,
                         present: weeklyPresent,
                         total: totalWeekly,
-                        absent: totalWeekly - weeklyPresent
+                        absent: totalWeekly - weeklyPresent,
+                        presentPercentage,
+                        absentPercentage
                     };
                 });
             }
@@ -354,15 +369,15 @@ const AttendanceDashboard = () => {
         }
     };
 
-    // Get maximum value for chart scaling
-    const getMaxDepartmentValue = () => {
-        if (attendanceData.departmentData.length === 0) return 1;
+    // Get maximum percentage for chart scaling
+    const getMaxDepartmentPercentage = () => {
+        if (attendanceData.departmentData.length === 0) return 100;
         return Math.max(...attendanceData.departmentData.map(dept => 
-            Math.max(dept.present, dept.absent)
-        ), 1);
+            Math.max(dept.presentPercentage, dept.absentPercentage)
+        ), 100);
     };
 
-    const maxDepartmentValue = getMaxDepartmentValue();
+    const maxDepartmentPercentage = getMaxDepartmentPercentage();
 
     return (
         <div className="dashboard-container">
@@ -483,18 +498,19 @@ const AttendanceDashboard = () => {
                                             {dept.department}
                                         </div>
                                         <div className="department-bar-wrapper">
+                                            {/* Present Percentage Bar */}
                                             <div 
                                                 className="department-bar present"
                                                 style={{ 
-                                                    height: `${(dept.present / maxDepartmentValue) * 100}%`,
-                                                    opacity: dept.present > 0 ? 1 : 0.3
+                                                    height: `${(dept.presentPercentage / maxDepartmentPercentage) * 100}%`,
+                                                    opacity: dept.presentPercentage > 0 ? 1 : 0.3
                                                 }}
                                             >
-                                                <span className="bar-count">{dept.present}</span>
+                                                <span className="bar-percentage">{dept.presentPercentage}%</span>
                                             </div>
                                         </div>
-                                        <div className="department-count">
-                                            Present: {dept.present}
+                                        <div className="department-percentage">
+                                            Present: {dept.presentPercentage}%
                                         </div>
                                     </div>
                                 ))}
@@ -502,11 +518,7 @@ const AttendanceDashboard = () => {
                             <div className="chart-legend">
                                 <div className="legend-item">
                                     <div className="legend-color present"></div>
-                                    <span>Present Employees</span>
-                                </div>
-                                <div className="legend-item">
-                                    <div className="legend-color absent"></div>
-                                    <span>Absent Employees</span>
+                                    <span>Present Percentage</span>
                                 </div>
                             </div>
                         </>
